@@ -56,14 +56,6 @@ export interface CapituloLibro {
   contenido: string;
 }
 
-export interface Sorpresa {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  fecha_desbloqueo?: string;
-  desbloqueada: boolean;
-}
-
 export interface Secreto {
   id: string;
   fecha_desbloqueo: string;
@@ -74,6 +66,16 @@ export interface Secreto {
 export interface Frase {
   id: string;
   texto: string;
+}
+
+export interface Biografia {
+  nombre: string;
+  apodo?: string;
+  frase_corta: string;
+  bio: string;
+  rasgos: string[];
+  curiosidades: { emoji: string; texto: string }[];
+  gustos: { icono: string; nombre: string }[];
 }
 
 export interface Configuracion {

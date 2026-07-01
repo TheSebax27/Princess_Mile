@@ -8,10 +8,9 @@ import { Messages } from './pages/Messages';
 import { Gallery } from './pages/Gallery';
 import { Playlist } from './pages/Playlist';
 import { AboutHer } from './pages/AboutHer';
-import { Likes } from './pages/Likes';
 import { Timeline } from './pages/Timeline';
 import { Book } from './pages/Book';
-import { Gifts } from './pages/Gifts';
+import { Planes } from './pages/Planes';
 import { Secret } from './pages/Secret';
 import { Settings } from './pages/Settings';
 
@@ -28,10 +27,9 @@ function Gate() {
         <Route path="/galeria" element={<Gallery />} />
         <Route path="/playlist" element={<Playlist />} />
         <Route path="/quien-es" element={<AboutHer />} />
-        <Route path="/gustos" element={<Likes />} />
         <Route path="/fechas" element={<Timeline />} />
         <Route path="/libro" element={<Book />} />
-        <Route path="/sorpresas" element={<Gifts />} />
+        <Route path="/planes" element={<Planes />} />
         <Route path="/secreto" element={<Secret />} />
         <Route path="/configuracion" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />

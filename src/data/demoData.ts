@@ -6,13 +6,39 @@ import type {
   Gusto,
   EventoTimeline,
   CapituloLibro,
-  Sorpresa,
   Frase,
   Configuracion,
+  Biografia,
 } from '../types';
 
+// ✏️ Edita este objeto con la información real de ella. Es el contenido
+// que se muestra en la página "Quién es". No necesita base de datos.
+export const biografiaDemo: Biografia = {
+  nombre: 'Milena Vargas',
+  apodo: 'Princesa',
+  frase_corta: 'Es de esas personas que llegan sin hacer ruido... y terminan cambiando todo.',
+  bio: `Milena Vargas es una señorita oriunda de Boyacá, que ha vivido toda su vida en Floresta. Le encantan los animales, la política y una buena pelea de vez en cuando — tiene un carácter fuerte y no se queda callada ante nada.
+
+Pero detrás de ese carácter hay una niña muy cariñosa, que se ganó mi corazón poco a poco, sin prisa, hasta convertirse en una de las personas más importantes de mi vida.`,
+  rasgos: ['Cariñosa', 'Peleona', 'Apasionada', 'Amante de los animales', 'Auténtica', 'Boyacense de corazón'],
+  curiosidades: [
+    { emoji: '🐾', texto: 'Ama a los animales más que a casi nada' },
+    { emoji: '🏞️', texto: 'Toda su vida en Floresta, Boyacá' },
+    { emoji: '🗣️', texto: 'Le encanta la política y defender lo que piensa' },
+    { emoji: '⚔️', texto: 'No le teme a una buena pelea' },
+  ],
+  gustos: [
+    { icono: '🇨🇴', nombre: 'Petro, presidente de Colombia' },
+    { icono: '🏘️', nombre: 'Ir a pueblos' },
+    { icono: '💐', nombre: 'Que la traten bonito' },
+    { icono: '⚽', nombre: 'Fan de Atlético Nacional' },
+    { icono: '🐾', nombre: 'Animales' },
+    { icono: '🗳️', nombre: 'Política' },
+  ],
+};
+
 export const configDemo: Configuracion = {
-  nombre_visitante: 'Sebastián',
+  nombre_visitante: 'mi niña hermosa',
   nombre_ella: 'Mile',
   lema: 'Un lugar donde cada recuerdo encuentra su espacio.',
 };
@@ -90,20 +116,15 @@ export const gustosDemo: Gusto[] = [
 ];
 
 export const timelineDemo: EventoTimeline[] = [
-  { id: 't1', fecha: '2025-02-14', titulo: 'El primer mensaje', descripcion: 'Todo empezó con una conversación que no queríamos que terminara.', icono: '💬' },
-  { id: 't2', fecha: '2025-05-20', titulo: 'La primera vez que nos vimos', descripcion: 'Nervios, risas y la certeza de que valía la pena.', icono: '🌷' },
-  { id: 't3', fecha: '2025-12-24', titulo: 'Primera Navidad juntos', descripcion: 'Entre luces y frío, encontramos calor.', icono: '✨' },
-  { id: 't4', fecha: '2026-06-30', titulo: 'Hoy', descripcion: 'Un día más para sumar a la lista.', icono: '❤️' },
+  { id: 't1', fecha: '2026-05-14', titulo: 'El primer mensaje', descripcion: 'Todo empezó con una conversación que no queríamos que terminara.', icono: '💬' },
+  { id: 't2', fecha: '2026-05-22', titulo: 'La primera vez que nos vimos', descripcion: 'Nervios, risas y la certeza de que valía la pena.', icono: '🌷' },
+  { id: 't3', fecha: '2026-08-01', titulo: 'Spider-Man: Brand New Day', descripcion: 'Plan pendiente: verla juntos en el cine.', icono: '🎬' },
+  { id: 't4', fecha: '2026-08-31', titulo: 'Cumpleaños de Milena', descripcion: 'Su día. A celebrarla como se merece.', icono: '🎂' },
 ];
 
 export const libroDemo: CapituloLibro[] = [
   { id: 'c1', orden: 1, titulo: 'Cómo empezó todo', contenido: 'Nunca planeamos nada de esto, y tal vez por eso se siente tan real...' },
   { id: 'c2', orden: 2, titulo: 'Los primeros meses', contenido: 'Aprendiendo el uno del otro, a nuestro propio ritmo...' },
   { id: 'c3', orden: 3, titulo: 'Lo que viene', contenido: 'Este capítulo todavía se está escribiendo...' },
-];
-
-export const sorpresasDemo: Sorpresa[] = [
-  { id: 's1', titulo: 'Carta sorpresa', descripcion: 'Algo especial que preparé para un día cualquiera.', desbloqueada: true },
-  { id: 's2', titulo: 'Para tu cumpleaños', descripcion: 'Se desbloquea automáticamente en la fecha.', fecha_desbloqueo: '2027-01-01', desbloqueada: false },
-  { id: 's3', titulo: 'Aniversario', descripcion: 'Un pequeño regalo para celebrar el tiempo juntos.', fecha_desbloqueo: '2027-02-14', desbloqueada: false },
+  { id: 'c4', orden: 4, titulo: 'Esta historia continúa', contenido: 'Esta historia continúa...' },
 ];

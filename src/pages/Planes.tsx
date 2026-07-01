@@ -1,0 +1,257 @@
+import { useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Plus, Pencil, Trash2, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { SectionTitle } from '../components/ui/GlassCard';
+import { usePlanes, type Plan } from '../hooks/usePlanes';
+
+function formatFecha(iso: string) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('es-CO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+interface FormState {
+  id?: string;
+  fecha: string;
+  lugar: string;
+  nota: string;
+  fotoFile: File | null;
+  fotoPreview: string | null;
+  removeFoto: boolean;
+}
+
+const emptyForm: FormState = { fecha: '', lugar: '', nota: '', fotoFile: null, fotoPreview: null, removeFoto: false };
+
+export function Planes() {
+  const { planes, loading, apiAvailable, saving, create, update, remove } = usePlanes();
+  const [form, setForm] = useState<FormState | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const openNew = () => setForm({ ...emptyForm });
+  const openEdit = (p: Plan) =>
+    setForm({
+      id: p.id,
+      fecha: p.fecha,
+      lugar: p.lugar,
+      nota: p.nota,
+      fotoFile: null,
+      fotoPreview: p.foto ? `/planes-photos/${p.foto}` : null,
+      removeFoto: false,
+    });
+  const closeForm = () => setForm(null);
+
+  const handleFile = (file: File | null) => {
+    if (!form) return;
+    if (!file) return;
+    setForm({ ...form, fotoFile: file, fotoPreview: URL.createObjectURL(file), removeFoto: false });
+  };
+
+  const handleSubmit = async () => {
+    if (!form) return;
+    if (!form.fecha || !form.lugar.trim()) {
+      toast.error('Ponle al menos fecha y lugar');
+      return;
+    }
+    try {
+      if (form.id) {
+        await update(form.id, {
+          fecha: form.fecha,
+          lugar: form.lugar,
+          nota: form.nota,
+          fotoFile: form.fotoFile,
+          removeFoto: form.removeFoto,
+        });
+        toast.success('Plan actualizado');
+      } else {
+        await create({ fecha: form.fecha, lugar: form.lugar, nota: form.nota, fotoFile: form.fotoFile });
+        toast.success('Plan agregado');
+      }
+      closeForm();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Algo salió mal');
+    }
+  };
+
+  const handleDelete = async (p: Plan) => {
+    const ok = await remove(p.id);
+    if (ok) toast.success('Plan eliminado');
+    else toast.error('No se pudo eliminar');
+  };
+
+  return (
+    <div>
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+        <SectionTitle eyebrow="Notas a futuro" title="Planes" subtitle="Cosas que queremos hacer juntos, con fecha o sin ella." />
+        {apiAvailable && (
+          <button
+            onClick={openNew}
+            className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-dark to-red px-5 py-2.5 text-sm font-semibold shadow-lg shadow-red/20 transition-transform hover:-translate-y-0.5"
+          >
+            <Plus className="h-4 w-4" />
+            Agregar salida
+          </button>
+        )}
+      </div>
+
+      {!apiAvailable && (
+        <div className="glass mb-6 rounded-2xl p-5 text-sm text-text-muted">
+          Esta sección necesita el servidor local (<code>npm run dev</code> o <code>npm run serve</code>) para guardar planes nuevos.
+        </div>
+      )}
+
+      {!loading && planes.length === 0 && (
+        <div className="glass rounded-2xl p-10 text-center text-sm text-text-muted">
+          Todavía no hay planes agregados. Crea el primero con el botón de arriba.
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {planes.map((p, i) => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.05 }}
+            className="glass glass-hover group overflow-hidden rounded-2xl"
+          >
+            <div className="relative h-40 w-full bg-panel-2">
+              {p.foto ? (
+                <img src={`/planes-photos/${p.foto}`} alt={p.lugar} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-text-muted">
+                  <ImageIcon className="h-8 w-8 opacity-40" />
+                </div>
+              )}
+              <div className="absolute right-2 top-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  onClick={() => openEdit(p)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
+                  aria-label="Editar"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => handleDelete(p)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-red-bright">{formatFecha(p.fecha)}</p>
+              <h3 className="mt-1 flex items-center gap-1.5 font-display text-lg font-medium">
+                <MapPin className="h-4 w-4 shrink-0 text-text-muted" />
+                {p.lugar}
+              </h3>
+              {p.nota && <p className="mt-2 text-sm text-text-muted">{p.nota}</p>}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {form && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+            onClick={closeForm}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass relative w-full max-w-md rounded-2xl p-6 sm:p-8"
+            >
+              <button onClick={closeForm} className="absolute right-4 top-4 rounded-lg p-1.5 text-text-muted hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+
+              <h3 className="mb-6 font-display text-xl font-medium">{form.id ? 'Editar plan' : 'Agregar salida'}</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="mb-1.5 block text-xs text-text-muted">Fecha</label>
+                  <input
+                    type="date"
+                    value={form.fecha}
+                    onChange={(e) => setForm({ ...form, fecha: e.target.value })}
+                    className="w-full rounded-xl border border-border bg-panel/70 px-3.5 py-2.5 text-sm text-white focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs text-text-muted">Lugar</label>
+                  <input
+                    type="text"
+                    value={form.lugar}
+                    onChange={(e) => setForm({ ...form, lugar: e.target.value })}
+                    placeholder="Ej: Cine, parque, Floresta..."
+                    className="w-full rounded-xl border border-border bg-panel/70 px-3.5 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs text-text-muted">Nota</label>
+                  <textarea
+                    value={form.nota}
+                    onChange={(e) => setForm({ ...form, nota: e.target.value })}
+                    rows={3}
+                    placeholder="¿Qué tienes en mente para este plan?"
+                    className="w-full resize-none rounded-xl border border-border bg-panel/70 px-3.5 py-2.5 text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block text-xs text-text-muted">Foto (opcional)</label>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+                  />
+                  {form.fotoPreview ? (
+                    <div className="relative h-32 w-full overflow-hidden rounded-xl">
+                      <img src={form.fotoPreview} alt="" className="h-full w-full object-cover" />
+                      <button
+                        onClick={() => setForm({ ...form, fotoFile: null, fotoPreview: null, removeFoto: true })}
+                        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => fileRef.current?.click()}
+                      className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border text-sm text-text-muted hover:border-red/40 hover:text-red-bright"
+                    >
+                      <ImageIcon className="h-4 w-4" /> Elegir foto
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmit}
+                disabled={saving}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-dark to-red px-4 py-3 text-sm font-semibold shadow-lg shadow-red/20 disabled:opacity-60"
+              >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {form.id ? 'Guardar cambios' : 'Agregar plan'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

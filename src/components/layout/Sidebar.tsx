@@ -5,10 +5,9 @@ import {
   Image,
   Music,
   Flower2,
-  Star,
   CalendarHeart,
   BookOpen,
-  Gift,
+  MapPin,
   Lock,
   Settings,
   Heart,
@@ -21,10 +20,9 @@ const links = [
   { to: '/galeria', label: 'Galería', icon: Image },
   { to: '/playlist', label: 'Playlist', icon: Music },
   { to: '/quien-es', label: 'Quién es', icon: Flower2 },
-  { to: '/gustos', label: 'Gustos', icon: Star },
   { to: '/fechas', label: 'Fechas', icon: CalendarHeart },
   { to: '/libro', label: 'Libro', icon: BookOpen },
-  { to: '/sorpresas', label: 'Sorpresas', icon: Gift },
+  { to: '/planes', label: 'Planes', icon: MapPin },
   { to: '/secreto', label: 'Secreto', icon: Lock },
 ];
 

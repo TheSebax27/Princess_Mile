@@ -1,4 +1,4 @@
-import { Search, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useMemo } from 'react';
 import { configDemo } from '../../data/demoData';
 
@@ -31,15 +31,6 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
           <p className="text-xs capitalize text-text-muted sm:text-sm">{fecha}</p>
         </div>
       </div>
-
-      <label className="relative hidden w-64 items-center sm:flex">
-        <Search className="pointer-events-none absolute left-3 h-4 w-4 text-text-muted" />
-        <input
-          type="text"
-          placeholder="Buscar..."
-          className="w-full rounded-full border border-border bg-panel/70 py-2 pl-9 pr-4 text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
-        />
-      </label>
     </header>
   );
 }
