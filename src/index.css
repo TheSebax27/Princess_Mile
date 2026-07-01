@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  --color-bg: #090909;
+  --color-panel: #111111;
+  --color-panel-2: #1a1a1a;
+  --color-red: #c1121f;
+  --color-red-bright: #e63946;
+  --color-red-dark: #780000;
+  --color-text: #ffffff;
+  --color-text-muted: #b3b3b3;
+  --color-border: #242424;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-red);
+  color: #fff;
+}
+
+/* Noise texture layered over the near-black background for a premium, non-flat feel */
+.noise-bg {
+  position: relative;
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(193, 18, 31, 0.07), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(193, 18, 31, 0.05), transparent 45%);
+}
+
+.noise-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Glass panel used across cards */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--color-border);
+}
+
+.glass-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.glass-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px -12px rgba(193, 18, 31, 0.35);
+  border-color: rgba(193, 18, 31, 0.4);
+}
+
+/* Custom thin scrollbar to match the dark, premium tone */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-red-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
