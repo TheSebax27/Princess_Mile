@@ -49,13 +49,6 @@ export interface EventoTimeline {
   icono?: string;
 }
 
-export interface CapituloLibro {
-  id: string;
-  orden: number;
-  titulo: string;
-  contenido: string;
-}
-
 export interface Secreto {
   id: string;
   fecha_desbloqueo: string;
@@ -68,14 +61,28 @@ export interface Frase {
   texto: string;
 }
 
-export interface Biografia {
+// "Quién es": datos base (fila única, tabla `biografia`)
+export interface BiografiaInfo {
+  id?: number;
   nombre: string;
   apodo?: string;
   frase_corta: string;
   bio: string;
-  rasgos: string[];
-  curiosidades: { emoji: string; texto: string }[];
-  gustos: { icono: string; nombre: string }[];
+}
+
+// "Quién es": rasgos de personalidad (tabla `rasgos`, una fila por rasgo)
+export interface Rasgo {
+  id: string;
+  texto: string;
+  orden?: number;
+}
+
+// "Quién es": curiosidades (tabla `curiosidades`, una fila por curiosidad)
+export interface Curiosidad {
+  id: string;
+  emoji: string;
+  texto: string;
+  orden?: number;
 }
 
 export interface Configuracion {

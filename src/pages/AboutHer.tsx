@@ -1,10 +1,27 @@
 import { motion } from 'framer-motion';
 import { SectionTitle } from '../components/ui/GlassCard';
-import { biografiaDemo } from '../data/demoData';
+import { useSupabaseTable } from '../hooks/useSupabaseTable';
+import { biografiaInfoDemo, rasgosDemo, curiosidadesDemo, gustosDemo } from '../data/demoData';
+import type { BiografiaInfo, Rasgo, Curiosidad, Gusto } from '../types';
 import perfilImg from '../assets/gallery/m2.jpeg';
 
 export function AboutHer() {
-  const bio = biografiaDemo;
+  // Fila única con los datos base (tabla `biografia`)
+  const { data: infoRows } = useSupabaseTable<BiografiaInfo>('biografia', [biografiaInfoDemo]);
+  const info = infoRows[0] ?? biografiaInfoDemo;
+
+  const { data: rasgos } = useSupabaseTable<Rasgo>('rasgos', rasgosDemo, { orderBy: 'orden' });
+  const { data: curiosidades } = useSupabaseTable<Curiosidad>('curiosidades', curiosidadesDemo, {
+    orderBy: 'orden',
+  });
+  const { data: gustos } = useSupabaseTable<Gusto>('gustos', gustosDemo, { orderBy: 'orden' });
+
+  const bio = {
+    ...info,
+    rasgos: rasgos.map((r) => r.texto),
+    curiosidades,
+    gustos,
+  };
 
   return (
     <div>

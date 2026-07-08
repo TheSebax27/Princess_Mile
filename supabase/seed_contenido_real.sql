@@ -84,6 +84,39 @@ insert into cartas (titulo, contenido, fecha, ocasion) values
   );
 
 -- ---------------------------------------------------------------------
+-- biografia, rasgos, curiosidades (página "Quién es")
+-- ---------------------------------------------------------------------
+update biografia
+set nombre = 'Milena Vargas',
+    apodo = 'Princesa',
+    frase_corta = 'Es de esas personas que llegan sin hacer ruido... y terminan cambiando todo.',
+    bio = E'Milena Vargas es una señorita oriunda de Boyacá, que ha vivido toda su vida en Floresta. Le encantan los animales, la política y una buena pelea de vez en cuando — tiene un carácter fuerte y no se queda callada ante nada.\n\nPero detrás de ese carácter hay una niña muy cariñosa, que se ganó mi corazón poco a poco, sin prisa, hasta convertirse en una de las personas más importantes de mi vida.',
+    updated_at = now()
+where id = 1;
+
+insert into biografia (id, nombre, apodo, frase_corta, bio)
+select 1, 'Milena Vargas', 'Princesa',
+  'Es de esas personas que llegan sin hacer ruido... y terminan cambiando todo.',
+  E'Milena Vargas es una señorita oriunda de Boyacá, que ha vivido toda su vida en Floresta. Le encantan los animales, la política y una buena pelea de vez en cuando — tiene un carácter fuerte y no se queda callada ante nada.\n\nPero detrás de ese carácter hay una niña muy cariñosa, que se ganó mi corazón poco a poco, sin prisa, hasta convertirse en una de las personas más importantes de mi vida.'
+where not exists (select 1 from biografia where id = 1);
+
+delete from rasgos;
+insert into rasgos (texto, orden) values
+  ('Cariñosa', 1),
+  ('Peleona', 2),
+  ('Apasionada', 3),
+  ('Amante de los animales', 4),
+  ('Auténtica', 5),
+  ('Boyacense de corazón', 6);
+
+delete from curiosidades;
+insert into curiosidades (emoji, texto, orden) values
+  ('🐾', 'Ama a los animales más que a casi nada', 1),
+  ('🏞️', 'Toda su vida en Floresta, Boyacá', 2),
+  ('🗣️', 'Le encanta la política y defender lo que piensa', 3),
+  ('⚔️', 'No le teme a una buena pelea', 4);
+
+-- ---------------------------------------------------------------------
 -- gustos
 -- ---------------------------------------------------------------------
 delete from gustos;
@@ -121,15 +154,9 @@ insert into timeline (fecha, titulo, descripcion, icono, orden) values
   ('2026-08-31', 'Cumpleaños de Milena', 'Su día. A celebrarla como se merece.', '🎂', 4);
 
 -- ---------------------------------------------------------------------
--- capsulas (capítulos del libro + sorpresas)
+-- capsulas (sorpresas desbloqueables por fecha)
 -- ---------------------------------------------------------------------
 delete from capsulas;
-
-insert into capsulas (tipo, orden, titulo, contenido, desbloqueada) values
-  ('capitulo', 1, 'Cómo empezó todo', 'Un mensaje cualquiera, un 14 de mayo, y de repente todo cambió.', true),
-  ('capitulo', 2, 'Conociéndonos', 'Entre pláticas de política, gatos, perros y pueblos, fui descubriendo quién eras de verdad.', true),
-  ('capitulo', 3, 'Su carácter', 'Peleona, apasionada, boyacense hasta el alma — y aun así la persona más cariñosa que conozco.', true),
-  ('capitulo', 4, 'Esta historia continúa', 'Esta historia continúa...', true);
 
 insert into capsulas (tipo, orden, titulo, descripcion, fecha_desbloqueo, desbloqueada) values
   ('sorpresa', 1, 'Spider-Man juntos', 'Plan para el 1 de agosto: verla en el cine, los dos.', '2026-08-01', false),

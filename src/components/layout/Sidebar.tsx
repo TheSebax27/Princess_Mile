@@ -6,7 +6,6 @@ import {
   Music,
   Flower2,
   CalendarHeart,
-  BookOpen,
   MapPin,
   Lock,
   Settings,
@@ -21,7 +20,6 @@ const links = [
   { to: '/playlist', label: 'Playlist', icon: Music },
   { to: '/quien-es', label: 'Quién es', icon: Flower2 },
   { to: '/fechas', label: 'Fechas', icon: CalendarHeart },
-  { to: '/libro', label: 'Libro', icon: BookOpen },
   { to: '/planes', label: 'Planes', icon: MapPin },
   { to: '/secreto', label: 'Secreto', icon: Lock },
 ];

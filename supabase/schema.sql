@@ -24,6 +24,40 @@ create table if not exists configuracion (
 );
 
 -- ---------------------------------------------------------------------
+-- Tabla: biografia (fila única con los datos de la página "Quién es")
+-- ---------------------------------------------------------------------
+create table if not exists biografia (
+  id int primary key default 1,
+  nombre text not null default 'Milena Vargas',
+  apodo text,
+  frase_corta text not null default '',
+  bio text not null default '',
+  updated_at timestamptz not null default now(),
+  constraint biografia_singleton check (id = 1)
+);
+
+-- ---------------------------------------------------------------------
+-- Tabla: rasgos (chips de personalidad en "Quién es")
+-- ---------------------------------------------------------------------
+create table if not exists rasgos (
+  id uuid primary key default gen_random_uuid(),
+  texto text not null,
+  orden int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------
+-- Tabla: curiosidades (tarjetas con emoji + texto en "Quién es")
+-- ---------------------------------------------------------------------
+create table if not exists curiosidades (
+  id uuid primary key default gen_random_uuid(),
+  emoji text not null default '✨',
+  texto text not null,
+  orden int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------
 -- Tabla: usuarios (opcional, si más adelante quieres login con Supabase Auth)
 -- ---------------------------------------------------------------------
 create table if not exists usuarios (
@@ -143,7 +177,9 @@ create table if not exists timeline (
 );
 
 -- ---------------------------------------------------------------------
--- Tabla: capsulas (usada para capítulos del libro y para sorpresas/regalos)
+-- Tabla: capsulas (contenido tipo "sorpresa"/regalo, desbloqueable por fecha).
+-- El tipo 'capitulo' quedó del antiguo apartado "Libro" (ya eliminado de
+-- la app); se deja en el check por compatibilidad, pero no se usa.
 -- ---------------------------------------------------------------------
 create table if not exists capsulas (
   id uuid primary key default gen_random_uuid(),
@@ -211,6 +247,8 @@ create index if not exists idx_playlist_orden on playlist (orden);
 create index if not exists idx_timeline_fecha on timeline (fecha);
 create index if not exists idx_capsulas_tipo_orden on capsulas (tipo, orden);
 create index if not exists idx_favoritos_tipo on favoritos (tipo, referencia_id);
+create index if not exists idx_rasgos_orden on rasgos (orden);
+create index if not exists idx_curiosidades_orden on curiosidades (orden);
 
 -- =====================================================================
 -- Row Level Security (RLS)
@@ -225,6 +263,9 @@ create index if not exists idx_favoritos_tipo on favoritos (tipo, referencia_id)
 -- =====================================================================
 
 alter table configuracion enable row level security;
+alter table biografia enable row level security;
+alter table rasgos enable row level security;
+alter table curiosidades enable row level security;
 alter table usuarios enable row level security;
 alter table mensajes enable row level security;
 alter table cartas enable row level security;
@@ -243,6 +284,9 @@ alter table favoritos enable row level security;
 
 -- Lectura pública (vía anon key) para todo el contenido "de cara al público"
 create policy "lectura publica" on configuracion for select using (true);
+create policy "lectura publica" on biografia for select using (true);
+create policy "lectura publica" on rasgos for select using (true);
+create policy "lectura publica" on curiosidades for select using (true);
 create policy "lectura publica" on mensajes for select using (true);
 create policy "lectura publica" on cartas for select using (true);
 create policy "lectura publica" on galeria for select using (true);
@@ -276,6 +320,9 @@ create policy "escritura autenticada" on timeline for all using (auth.role() = '
 create policy "escritura autenticada" on capsulas for all using (auth.role() = 'authenticated');
 create policy "escritura autenticada" on secretos for all using (auth.role() = 'authenticated');
 create policy "escritura autenticada" on configuracion for all using (auth.role() = 'authenticated');
+create policy "escritura autenticada" on biografia for all using (auth.role() = 'authenticated');
+create policy "escritura autenticada" on rasgos for all using (auth.role() = 'authenticated');
+create policy "escritura autenticada" on curiosidades for all using (auth.role() = 'authenticated');
 create policy "escritura autenticada" on notificaciones for all using (auth.role() = 'authenticated');
 create policy "escritura autenticada" on favoritos for all using (auth.role() = 'authenticated');
 create policy "escritura autenticada" on usuarios for all using (auth.role() = 'authenticated');
@@ -289,6 +336,25 @@ create policy "escritura autenticada" on categorias for all using (auth.role() =
 insert into configuracion (id, nombre_visitante, nombre_ella, lema)
 values (1, 'Sebastián', 'Mile', 'Un lugar donde cada recuerdo encuentra su espacio.')
 on conflict (id) do nothing;
+
+insert into biografia (id, nombre, apodo, frase_corta, bio)
+values (
+  1,
+  'Milena Vargas',
+  'Princesa',
+  'Es de esas personas que llegan sin hacer ruido... y terminan cambiando todo.',
+  E'Milena Vargas es una señorita oriunda de Boyacá, que ha vivido toda su vida en Floresta.\n\nAma a los animales, la política y una buena pelea de vez en cuando.'
+)
+on conflict (id) do nothing;
+
+insert into rasgos (texto, orden) values
+  ('Cariñosa', 1),
+  ('Peleona', 2),
+  ('Apasionada', 3);
+
+insert into curiosidades (emoji, texto, orden) values
+  ('🐾', 'Ama a los animales más que a casi nada', 1),
+  ('🏞️', 'Toda su vida en Floresta, Boyacá', 2);
 
 insert into frases (texto) values
   ('Siempre hay algo nuevo para descubrir.'),
@@ -314,9 +380,6 @@ insert into gustos (categoria, nombre, icono) values
 insert into timeline (fecha, titulo, descripcion, icono) values
   (current_date - 180, 'El primer mensaje', 'Todo empezó con una conversación que no queríamos que terminara.', '💬'),
   (current_date, 'Hoy', 'Un día más para sumar a la lista.', '❤️');
-
-insert into capsulas (tipo, orden, titulo, contenido, desbloqueada) values
-  ('capitulo', 1, 'Cómo empezó todo', 'Nunca planeamos nada de esto, y tal vez por eso se siente tan real...', true);
 
 insert into capsulas (tipo, orden, titulo, descripcion, fecha_desbloqueo, desbloqueada) values
   ('sorpresa', 1, 'Carta sorpresa', 'Algo especial que preparé para un día cualquiera.', current_date, true);

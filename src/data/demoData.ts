@@ -5,37 +5,41 @@ import type {
   Razon,
   Gusto,
   EventoTimeline,
-  CapituloLibro,
   Frase,
   Configuracion,
-  Biografia,
+  BiografiaInfo,
+  Rasgo,
+  Curiosidad,
 } from '../types';
 
-// ✏️ Edita este objeto con la información real de ella. Es el contenido
-// que se muestra en la página "Quién es". No necesita base de datos.
-export const biografiaDemo: Biografia = {
+// ⚠️ Todo lo de abajo es solo el "fallback" que se muestra si Supabase no
+// está configurado (o no responde). Con Supabase conectado, la página
+// "Quién es" lee de las tablas `biografia`, `rasgos`, `curiosidades` y
+// `gustos` — edítalas ahí (o desde el futuro panel de administrador).
+export const biografiaInfoDemo: BiografiaInfo = {
   nombre: 'Milena Vargas',
   apodo: 'Princesa',
   frase_corta: 'Es de esas personas que llegan sin hacer ruido... y terminan cambiando todo.',
   bio: `Milena Vargas es una señorita oriunda de Boyacá, que ha vivido toda su vida en Floresta. Le encantan los animales, la política y una buena pelea de vez en cuando — tiene un carácter fuerte y no se queda callada ante nada.
 
 Pero detrás de ese carácter hay una niña muy cariñosa, que se ganó mi corazón poco a poco, sin prisa, hasta convertirse en una de las personas más importantes de mi vida.`,
-  rasgos: ['Cariñosa', 'Peleona', 'Apasionada', 'Amante de los animales', 'Auténtica', 'Boyacense de corazón'],
-  curiosidades: [
-    { emoji: '🐾', texto: 'Ama a los animales más que a casi nada' },
-    { emoji: '🏞️', texto: 'Toda su vida en Floresta, Boyacá' },
-    { emoji: '🗣️', texto: 'Le encanta la política y defender lo que piensa' },
-    { emoji: '⚔️', texto: 'No le teme a una buena pelea' },
-  ],
-  gustos: [
-    { icono: '🇨🇴', nombre: 'Petro, presidente de Colombia' },
-    { icono: '🏘️', nombre: 'Ir a pueblos' },
-    { icono: '💐', nombre: 'Que la traten bonito' },
-    { icono: '⚽', nombre: 'Fan de Atlético Nacional' },
-    { icono: '🐾', nombre: 'Animales' },
-    { icono: '🗳️', nombre: 'Política' },
-  ],
 };
+
+export const rasgosDemo: Rasgo[] = [
+  { id: 'r1', texto: 'Cariñosa' },
+  { id: 'r2', texto: 'Peleona' },
+  { id: 'r3', texto: 'Apasionada' },
+  { id: 'r4', texto: 'Amante de los animales' },
+  { id: 'r5', texto: 'Auténtica' },
+  { id: 'r6', texto: 'Boyacense de corazón' },
+];
+
+export const curiosidadesDemo: Curiosidad[] = [
+  { id: 'c1', emoji: '🐾', texto: 'Ama a los animales más que a casi nada' },
+  { id: 'c2', emoji: '🏞️', texto: 'Toda su vida en Floresta, Boyacá' },
+  { id: 'c3', emoji: '🗣️', texto: 'Le encanta la política y defender lo que piensa' },
+  { id: 'c4', emoji: '⚔️', texto: 'No le teme a una buena pelea' },
+];
 
 export const configDemo: Configuracion = {
   nombre_visitante: 'mi niña hermosa',
@@ -107,12 +111,12 @@ export const razonesDemo: Razon[] = [
 ];
 
 export const gustosDemo: Gusto[] = [
-  { id: 'gu1', categoria: 'Animales', nombre: 'Gatos', icono: '🐱' },
-  { id: 'gu2', categoria: 'Flores', nombre: 'Tulipanes', icono: '🌷' },
-  { id: 'gu3', categoria: 'Hobbies', nombre: 'Leer', icono: '📚' },
-  { id: 'gu4', categoria: 'Lugares', nombre: 'Cafeterías', icono: '☕' },
-  { id: 'gu5', categoria: 'Colores', nombre: 'Rojo vino', icono: '🍷' },
-  { id: 'gu6', categoria: 'Música', nombre: 'Baladas', icono: '🎵' },
+  { id: 'gu1', categoria: 'Política', nombre: 'Petro, presidente de Colombia', icono: '🇨🇴' },
+  { id: 'gu2', categoria: 'Viajes', nombre: 'Ir a pueblos', icono: '🏘️' },
+  { id: 'gu3', categoria: 'Personalidad', nombre: 'Que la traten bonito', icono: '💐' },
+  { id: 'gu4', categoria: 'Fútbol', nombre: 'Atlético Nacional', icono: '⚽' },
+  { id: 'gu5', categoria: 'Animales', nombre: 'Animales en general', icono: '🐾' },
+  { id: 'gu6', categoria: 'Política', nombre: 'Debates y política', icono: '🗳️' },
 ];
 
 export const timelineDemo: EventoTimeline[] = [
@@ -122,9 +126,3 @@ export const timelineDemo: EventoTimeline[] = [
   { id: 't4', fecha: '2026-08-31', titulo: 'Cumpleaños de Milena', descripcion: 'Su día. A celebrarla como se merece.', icono: '🎂' },
 ];
 
-export const libroDemo: CapituloLibro[] = [
-  { id: 'c1', orden: 1, titulo: 'Cómo empezó todo', contenido: 'Nunca planeamos nada de esto, y tal vez por eso se siente tan real...' },
-  { id: 'c2', orden: 2, titulo: 'Los primeros meses', contenido: 'Aprendiendo el uno del otro, a nuestro propio ritmo...' },
-  { id: 'c3', orden: 3, titulo: 'Lo que viene', contenido: 'Este capítulo todavía se está escribiendo...' },
-  { id: 'c4', orden: 4, titulo: 'Esta historia continúa', contenido: 'Esta historia continúa...' },
-];
