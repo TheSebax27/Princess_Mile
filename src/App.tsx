@@ -7,6 +7,7 @@ import { Home } from './pages/Home';
 import { Messages } from './pages/Messages';
 import { Gallery } from './pages/Gallery';
 import { Playlist } from './pages/Playlist';
+import { Audios } from './pages/Audios';
 import { AboutHer } from './pages/AboutHer';
 import { Timeline } from './pages/Timeline';
 import { Planes } from './pages/Planes';
@@ -25,6 +26,7 @@ function Gate() {
         <Route path="/mensajes" element={<Messages />} />
         <Route path="/galeria" element={<Gallery />} />
         <Route path="/playlist" element={<Playlist />} />
+        <Route path="/audios" element={<Audios />} />
         <Route path="/quien-es" element={<AboutHer />} />
         <Route path="/fechas" element={<Timeline />} />
         <Route path="/planes" element={<Planes />} />
