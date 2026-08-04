@@ -117,6 +117,25 @@ Notas:
   `fix_timeline.sql`, `seed_contenido_real.sql`, `seed_mensajes.sql` (migraciones/seeds
   puntuales, no versionado por número — revisar cuál ya se corrió antes de re-correr).
 
+## Exportar información en PDF (botón del Home)
+
+El hero de `Home.tsx` tiene un botón "Exportar información" (reemplazó un ícono
+decorativo estático que había ahí) que descarga un PDF de varias páginas con el
+resumen de Milena: biografía, rasgos, curiosidades, gustos y razones.
+
+- `src/hooks/useResumenMilena.ts` — junta biografía + rasgos + curiosidades + gustos +
+  razones + configuración (mismas tablas que ya usan `AboutHer.tsx`/`Home.tsx`, más
+  `razones`/`configuracion` que no se leían juntas en ningún otro lado).
+- `src/lib/generarResumenPdf.ts` — arma el PDF a mano con `jsPDF` (texto, rects,
+  círculos con opacidad para simular el glow rojo del sitio), replicando la paleta de
+  `src/index.css` (fondo casi negro, acentos rojos, tipografía serif para títulos).
+  No usa `html2canvas` ni fuentes personalizadas (jsPDF no permite cargar `.ttf` sin
+  un paso de build con Node, que no está disponible en este entorno) — usa las fuentes
+  base de jsPDF (`times`/`helvetica`) como aproximación a Playfair Display/Inter.
+- Depende de `jspdf` (agregado a `package.json`, **hay que correr `npm install`** para
+  que se descargue — no se pudo instalar automáticamente en este entorno porque no
+  tiene Node.js disponible).
+
 ## Tipos (`src/types/index.ts`)
 
 Interfaces en español que reflejan 1:1 las tablas de Supabase: `Mensaje`,

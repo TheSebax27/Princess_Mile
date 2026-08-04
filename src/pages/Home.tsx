@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Mail, Image as ImageIcon, Music, ArrowRight, Heart } from 'lucide-react';
+import { Mail, Image as ImageIcon, Music, ArrowRight, Heart, FileDown, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useSupabaseTable } from '../hooks/useSupabaseTable';
 import { useGallery } from '../hooks/useGallery';
+import { useResumenMilena } from '../hooks/useResumenMilena';
+import { generarResumenMilenaPdf } from '../lib/generarResumenPdf';
 import { mensajesDemo, frasesDemo } from '../data/demoData';
 import type { Mensaje } from '../types';
-import heroImg from '../assets/hero.png';
+import perfilImg from '../assets/gallery/m2.jpeg';
 
 const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -22,9 +26,31 @@ const item: Variants = {
 export function Home() {
   const { data: mensajes } = useSupabaseTable<Mensaje>('mensajes', mensajesDemo, { orderBy: 'fecha', ascending: false });
   const { fotos } = useGallery();
+  const resumen = useResumenMilena();
+  const [exportando, setExportando] = useState(false);
 
   const ultimoMensaje = mensajes[0];
   const ultimaFoto = fotos.find((f) => f.puedeEliminar) ?? fotos[0];
+
+  const handleExportar = async () => {
+    setExportando(true);
+    try {
+      await generarResumenMilenaPdf({
+        info: resumen.info,
+        rasgos: resumen.rasgos,
+        curiosidades: resumen.curiosidades,
+        gustos: resumen.gustos,
+        razones: resumen.razones,
+        config: resumen.config,
+        fotoUrl: perfilImg,
+      });
+      toast.success('PDF generado');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo generar el PDF');
+    } finally {
+      setExportando(false);
+    }
+  };
 
   return (
     <div>
@@ -52,11 +78,22 @@ export function Home() {
               Descubrir <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <img
-            src={heroImg}
-            alt=""
-            className="hidden h-32 w-32 rounded-2xl object-cover opacity-90 sm:block"
-          />
+          <button
+            onClick={handleExportar}
+            disabled={exportando || resumen.loading}
+            aria-label="Exportar información"
+            className="group relative hidden shrink-0 flex-col items-center justify-center gap-3 rounded-2xl border border-border bg-white/[0.03] px-8 py-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-red/50 hover:bg-red/10 disabled:opacity-60 disabled:hover:translate-y-0 sm:flex"
+          >
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-red-bright to-red-dark text-white shadow-lg shadow-red/30 transition-transform duration-300 group-hover:scale-110">
+              {exportando ? <Loader2 className="h-5 w-5 animate-spin" /> : <FileDown className="h-5 w-5" />}
+            </span>
+            <span>
+              <span className="block text-sm font-semibold">Exportar información</span>
+              <span className="mt-0.5 block text-xs text-text-muted">
+                {exportando ? 'Generando PDF...' : 'Descarga su resumen en PDF'}
+              </span>
+            </span>
+          </button>
         </div>
       </motion.div>
 
