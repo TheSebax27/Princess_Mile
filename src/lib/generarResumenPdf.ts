@@ -8,6 +8,7 @@ export interface ResumenMilenaData {
   razones: Razon[];
   config: Configuracion;
   fotoUrl?: string;
+  playlistUrl?: string;
 }
 
 type RGB = [number, number, number];
@@ -34,6 +35,38 @@ function loadImage(url: string): Promise<HTMLImageElement> {
     img.onerror = () => reject(new Error('No se pudo cargar la foto'));
     img.src = url;
   });
+}
+
+// jsPDF solo sabe dibujar con fuentes estándar de PDF (Helvetica/Times/Courier),
+// que no tienen glyphs de emoji — por eso salían como cuadros/jeroglíficos. La
+// solución es pintar cada emoji con la fuente de emoji del sistema en un <canvas>
+// y meter ese canvas como imagen PNG en el PDF, no como texto.
+const emojiCache = new Map<string, string | null>();
+
+function emojiToDataUrl(emoji: string): string | null {
+  if (emojiCache.has(emoji)) return emojiCache.get(emoji) ?? null;
+  try {
+    const px = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = px;
+    canvas.height = px;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      emojiCache.set(emoji, null);
+      return null;
+    }
+    ctx.clearRect(0, 0, px, px);
+    ctx.font = `${Math.round(px * 0.75)}px "Segoe UI Emoji", "Noto Color Emoji", "Apple Color Emoji", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, px / 2, px / 2 + px * 0.04);
+    const dataUrl = canvas.toDataURL('image/png');
+    emojiCache.set(emoji, dataUrl);
+    return dataUrl;
+  } catch {
+    emojiCache.set(emoji, null);
+    return null;
+  }
 }
 
 /** Genera y descarga un PDF con el resumen de Milena: biografía, rasgos,
@@ -97,6 +130,12 @@ export async function generarResumenMilenaPdf(data: ResumenMilenaData): Promise<
     doc.setFontSize(24);
     doc.setTextColor(...COLOR_TEXT);
     doc.text(text, MARGIN, y);
+  }
+
+  function addEmoji(emoji: string, x: number, y: number, size = 6) {
+    const dataUrl = emojiToDataUrl(emoji);
+    if (!dataUrl) return;
+    doc.addImage(dataUrl, 'PNG', x, y, size, size);
   }
 
   function ensureSpace(y: number, limit = 262) {
@@ -226,8 +265,7 @@ export async function generarResumenMilenaPdf(data: ResumenMilenaData): Promise<
     doc.setDrawColor(...COLOR_BORDER);
     doc.setFillColor(...COLOR_PANEL);
     doc.roundedRect(cx, y, colW, boxH, 3, 3, 'FD');
-    doc.setFontSize(14);
-    doc.text(c.emoji, cx + 6, y + 10);
+    addEmoji(c.emoji, cx + 6, y + 4, 8);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9.5);
     doc.setTextColor(...COLOR_MUTED);
@@ -259,13 +297,51 @@ export async function generarResumenMilenaPdf(data: ResumenMilenaData): Promise<
     y += 7;
     for (const it of data.gustos.filter((g) => g.categoria === cat)) {
       y = ensureSpace(y);
+      addEmoji(it.icono, MARGIN + 3, y - 4.2, 5.5);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10.5);
       doc.setTextColor(...COLOR_TEXT);
-      doc.text(`${it.icono}  ${it.nombre}`, MARGIN + 3, y);
+      doc.text(it.nombre, MARGIN + 11, y);
       y += 6.5;
     }
     y += 4;
+  }
+
+  // ───────────────────────── Página · Playlist ─────────────────────────
+  if (data.playlistUrl) {
+    const COLOR_SPOTIFY: RGB = [29, 185, 84];
+    newPage();
+    eyebrow('Para escuchar', 32);
+    sectionTitle('Su playlist', 44);
+
+    const gx = MARGIN + 10;
+    const gy = 68;
+    doc.setFillColor(...COLOR_SPOTIFY);
+    doc.circle(gx, gy, 10, 'F');
+    doc.setFillColor(...COLOR_BG);
+    doc.triangle(gx - 3.2, gy - 5, gx - 3.2, gy + 5, gx + 5, gy, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...COLOR_TEXT);
+    doc.text('Todas las canciones que nos acompañan', MARGIN + 26, gy - 2);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...COLOR_MUTED);
+    doc.text('Conectada en vivo con Spotify', MARGIN + 26, gy + 5);
+
+    const boxY = gy + 22;
+    const boxH = 22;
+    doc.setDrawColor(...COLOR_BORDER);
+    doc.setFillColor(...COLOR_PANEL);
+    doc.roundedRect(MARGIN, boxY, CONTENT_W, boxH, 4, 4, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(...COLOR_SPOTIFY);
+    doc.textWithLink('Abrir la playlist en Spotify  →', MARGIN + 9, boxY + boxH / 2 + 1.5, {
+      url: data.playlistUrl,
+    });
+    doc.link(MARGIN, boxY, CONTENT_W, boxH, { url: data.playlistUrl });
   }
 
   // ───────────────────────── Página · Razones ─────────────────────────
@@ -279,12 +355,18 @@ export async function generarResumenMilenaPdf(data: ResumenMilenaData): Promise<
     doc.setFont('times', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(...COLOR_RED_BRIGHT);
-    doc.text(`${r.numero}.`, MARGIN, y);
+    const numStr = `${r.numero}.`;
+    doc.text(numStr, MARGIN, y);
+    const numW = doc.getTextWidth(numStr);
+
+    addEmoji(r.emoji, MARGIN + numW + 3, y - 4.5, 6);
+
+    const textX = MARGIN + numW + 3 + 8.5;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11.5);
     doc.setTextColor(...COLOR_TEXT);
-    const lines = doc.splitTextToSize(`${r.texto}  ${r.emoji}`, CONTENT_W - 16);
-    doc.text(lines, MARGIN + 12, y);
+    const lines = doc.splitTextToSize(r.texto, PAGE_W - MARGIN - textX);
+    doc.text(lines, textX, y);
     y += lines.length * 6.5 + 5;
   }
 

@@ -132,6 +132,16 @@ resumen de Milena: biografía, rasgos, curiosidades, gustos y razones.
   No usa `html2canvas` ni fuentes personalizadas (jsPDF no permite cargar `.ttf` sin
   un paso de build con Node, que no está disponible en este entorno) — usa las fuentes
   base de jsPDF (`times`/`helvetica`) como aproximación a Playfair Display/Inter.
+  Incluye una página con el link a la playlist de Spotify (`src/lib/spotify.ts`,
+  compartido con `Playlist.tsx`), con `doc.textWithLink` + `doc.link` como zona
+  clickeable.
+- **Emojis en el PDF**: las fuentes estándar de PDF (Helvetica/Times) no tienen
+  glyphs de emoji — por eso al principio salían como jeroglíficos. La solución:
+  `emojiToDataUrl()` dibuja cada emoji con la fuente de emoji del sistema
+  ("Segoe UI Emoji" en Windows) en un `<canvas>` oculto y lo mete al PDF como imagen
+  PNG (`addEmoji()`), no como texto. Ojo: en Windows los emojis de bandera (🇨🇴, etc.)
+  se ven como letras en un cuadro (ej. "CO") en vez de la bandera real — es una
+  limitación de la fuente Segoe UI Emoji del sistema operativo, no del código.
 - Depende de `jspdf` (agregado a `package.json`, **hay que correr `npm install`** para
   que se descargue — no se pudo instalar automáticamente en este entorno porque no
   tiene Node.js disponible).

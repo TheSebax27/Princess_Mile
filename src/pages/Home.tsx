@@ -8,6 +8,7 @@ import { useSupabaseTable } from '../hooks/useSupabaseTable';
 import { useGallery } from '../hooks/useGallery';
 import { useResumenMilena } from '../hooks/useResumenMilena';
 import { generarResumenMilenaPdf } from '../lib/generarResumenPdf';
+import { SPOTIFY_PLAYLIST_URL } from '../lib/spotify';
 import { mensajesDemo, frasesDemo } from '../data/demoData';
 import type { Mensaje } from '../types';
 import perfilImg from '../assets/gallery/m2.jpeg';
@@ -43,6 +44,7 @@ export function Home() {
         razones: resumen.razones,
         config: resumen.config,
         fotoUrl: perfilImg,
+        playlistUrl: SPOTIFY_PLAYLIST_URL,
       });
       toast.success('PDF generado');
     } catch (err) {

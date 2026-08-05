@@ -1,17 +1,7 @@
 import { motion } from 'framer-motion';
 import { ExternalLink } from 'lucide-react';
 import { SectionTitle } from '../components/ui/GlassCard';
-
-// Puedes cambiar la playlist sin tocar código: define VITE_SPOTIFY_PLAYLIST_URL
-// en tu .env con el link de "Compartir > Copiar enlace" de Spotify.
-const SPOTIFY_PLAYLIST_URL =
-  (import.meta.env.VITE_SPOTIFY_PLAYLIST_URL as string | undefined) ??
-  'https://open.spotify.com/playlist/54vCPeGO08V1BkjmN1FTBF?si=80887541af7e4d8f';
-
-function getSpotifyPlaylistId(url: string): string | null {
-  const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
-  return match ? match[1] : null;
-}
+import { SPOTIFY_PLAYLIST_URL, getSpotifyPlaylistId } from '../lib/spotify';
 
 function SpotifyLogo({ className }: { className?: string }) {
   return (
