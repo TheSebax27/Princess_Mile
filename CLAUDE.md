@@ -38,10 +38,17 @@ tabla `usuarios` (`auth_id`, `nombre`, `rol`), con `rol` en `admin` | `editor` |
 `visualizador` (ver `supabase/agregar_auth_roles.sql` — hay que correrlo una vez).
 
 - **Registro** (`Login.tsx`, modo "Crear cuenta"): siempre crea al usuario con
-  `rol = 'visualizador'`, hardcodeado en `AuthContext.signup()` — nadie se puede
-  auto-asignar admin/editor desde la web. Para que Sebastián sea `admin` y Mile
-  `editor`, cada uno se registra normal y después alguien les cambia el `rol` a mano
-  desde el Table Editor de Supabase (tabla `usuarios`).
+  `rol = 'visualizador'`, hardcodeado en `AuthContext.signup()` **y reforzado por RLS**
+  (`agregar_auth_roles.sql`: la política de insert exige `rol = 'visualizador'`).
+- **Panel "Usuarios y roles"** (`Settings.tsx`, componente `GestionUsuarios` +
+  `src/hooks/useUsuarios.ts`): solo visible si `esAdmin`. Lista todas las cuentas
+  registradas y deja cambiar el rol con un `<select>`. La app nunca crea cuentas con
+  contraseña por su cuenta — cada persona se registra sola desde "Crear cuenta"
+  (queda `visualizador`), y el admin la sube de rol después desde este panel. La
+  primera vez que exista un admin hay que promoverlo a mano desde el Table Editor de
+  Supabase (bootstrap, ver comentario al final de `agregar_auth_roles.sql`) — de ahí
+  en adelante todo se maneja desde la web. Solo un `admin` puede cambiar roles: lo
+  impone la RLS de `usuarios`, no solo el `if` de React.
 - `puedeEditar` = `rol === 'admin' || rol === 'editor'` — gatea los botones de
   escritura en `Gallery.tsx`, `Planes.tsx` y `Audios.tsx` (subir/editar/eliminar
   desaparecen para `visualizador`; el resto de la web sigue siendo de solo lectura
