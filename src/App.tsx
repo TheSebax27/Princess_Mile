@@ -15,8 +15,9 @@ import { Secret } from './pages/Secret';
 import { Settings } from './pages/Settings';
 
 function Gate() {
-  const { isUnlocked } = useAuth();
+  const { isUnlocked, loading } = useAuth();
 
+  if (loading) return null;
   if (!isUnlocked) return <Login />;
 
   return (

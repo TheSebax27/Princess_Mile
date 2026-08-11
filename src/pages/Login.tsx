@@ -1,22 +1,37 @@
 import { useState, type FormEvent } from 'react';
-import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { configDemo } from '../data/demoData';
 
 export function Login() {
-  const { unlock } = useAuth();
-  const [code, setCode] = useState('');
-  const [error, setError] = useState(false);
-  const hasCode = Boolean(import.meta.env.VITE_ACCESS_CODE);
+  const { login, signup } = useAuth();
+  const [modo, setModo] = useState<'entrar' | 'crear'>('entrar');
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const ok = unlock(code);
-    if (!ok) {
-      setError(true);
-      setTimeout(() => setError(false), 1600);
+    setError(null);
+    setInfo(null);
+    setCargando(true);
+    try {
+      const res = modo === 'entrar' ? await login(email, password) : await signup(email, password, nombre);
+      if (!res.ok) setError(res.error ?? 'Algo salió mal');
+      else if (res.requiereConfirmacion) setInfo('Revisa tu correo para confirmar la cuenta antes de entrar.');
+    } finally {
+      setCargando(false);
     }
+  };
+
+  const cambiarModo = () => {
+    setModo(modo === 'entrar' ? 'crear' : 'entrar');
+    setError(null);
+    setInfo(null);
   };
 
   return (
@@ -39,29 +54,57 @@ export function Login() {
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">princesa-Mile</h1>
         <p className="mt-3 text-sm text-text-muted sm:text-base">{configDemo.lema}</p>
 
-        <form onSubmit={handleSubmit} className="mt-9 space-y-4">
-          {hasCode && (
-            <motion.input
-              animate={error ? { x: [0, -8, 8, -6, 6, 0] } : {}}
-              transition={{ duration: 0.4 }}
-              type="password"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Código de acceso"
-              className="w-full rounded-xl border border-border bg-panel/70 px-4 py-3 text-center text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
-            />
-          )}
+        <form onSubmit={handleSubmit} className="mt-9 space-y-3">
+          <AnimatePresence initial={false}>
+            {modo === 'crear' && (
+              <motion.input
+                key="nombre"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                placeholder="Tu nombre"
+                required
+                className="w-full rounded-xl border border-border bg-panel/70 px-4 py-3 text-center text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+              />
+            )}
+          </AnimatePresence>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Correo"
+            required
+            className="w-full rounded-xl border border-border bg-panel/70 px-4 py-3 text-center text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Contraseña"
+            required
+            minLength={6}
+            className="w-full rounded-xl border border-border bg-panel/70 px-4 py-3 text-center text-sm text-white placeholder:text-text-muted focus:border-red/60 focus:outline-none focus:ring-2 focus:ring-red/20"
+          />
+
           <button
             type="submit"
-            className="w-full rounded-xl bg-gradient-to-r from-red-dark to-red px-4 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-red/20 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-red/30 active:translate-y-0"
+            disabled={cargando}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-dark to-red px-4 py-3 text-sm font-semibold tracking-wide text-white shadow-lg shadow-red/20 transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-red/30 active:translate-y-0 disabled:opacity-60"
           >
-            Entrar
+            {cargando && <Loader2 className="h-4 w-4 animate-spin" />}
+            {modo === 'entrar' ? 'Entrar' : 'Crear cuenta'}
           </button>
         </form>
 
-        {error && (
-          <p className="mt-3 text-xs text-red-bright">Ese código no es correcto. Intenta otra vez.</p>
-        )}
+        {error && <p className="mt-3 text-xs text-red-bright">{error}</p>}
+        {info && <p className="mt-3 text-xs text-text-muted">{info}</p>}
+
+        <button onClick={cambiarModo} className="mt-6 text-xs text-text-muted underline decoration-dotted hover:text-red-bright">
+          {modo === 'entrar' ? '¿No tenés cuenta? Creá una' : '¿Ya tenés cuenta? Entrá'}
+        </button>
       </motion.div>
     </div>
   );

@@ -90,3 +90,12 @@ export interface Configuracion {
   nombre_ella: string;
   lema: string;
 }
+
+export type Rol = 'admin' | 'editor' | 'visualizador';
+
+export interface Usuario {
+  id: string;
+  auth_id: string;
+  nombre: string;
+  rol: Rol;
+}

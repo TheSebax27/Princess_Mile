@@ -4,6 +4,7 @@ import { Plus, Trash2, X, Loader2, Music2, Play, Pause } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SectionTitle } from '../components/ui/GlassCard';
 import { useAudios, type AudioClip } from '../hooks/useAudios';
+import { useAuth } from '../context/AuthContext';
 
 function formatTime(segundos: number) {
   const m = Math.floor(segundos / 60);
@@ -18,11 +19,13 @@ function AudioCard({
   isPlaying,
   onToggle,
   onDelete,
+  puedeEditar,
 }: {
   audio: AudioClip;
   isPlaying: boolean;
   onToggle: () => void;
   onDelete: () => void;
+  puedeEditar: boolean;
 }) {
   const ref = useRef<HTMLAudioElement | null>(null);
   const [duracion, setDuracion] = useState<number | null>(null);
@@ -75,13 +78,15 @@ function AudioCard({
           </p>
         </div>
 
-        <button
-          onClick={onDelete}
-          aria-label="Eliminar audio"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-muted opacity-0 transition-opacity hover:bg-red/20 hover:text-red-bright group-hover:opacity-100"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        {puedeEditar && (
+          <button
+            onClick={onDelete}
+            aria-label="Eliminar audio"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-muted opacity-0 transition-opacity hover:bg-red/20 hover:text-red-bright group-hover:opacity-100"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -89,6 +94,7 @@ function AudioCard({
 
 export function Audios() {
   const { audios, apiAvailable, uploading, upload, remove } = useAudios();
+  const { puedeEditar } = useAuth();
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [form, setForm] = useState<{ titulo: string; file: File | null } | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -134,7 +140,7 @@ export function Audios() {
           title="Audios"
           subtitle="Los audios que quiero guardar para escucharlos cuando quiera."
         />
-        {apiAvailable && (
+        {apiAvailable && puedeEditar && (
           <button
             onClick={openNew}
             className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-dark to-red px-5 py-2.5 text-sm font-semibold shadow-lg shadow-red/20 transition-transform hover:-translate-y-0.5"
@@ -165,6 +171,7 @@ export function Audios() {
             isPlaying={playingId === audio.id}
             onToggle={() => setPlayingId((prev) => (prev === audio.id ? null : audio.id))}
             onDelete={() => handleDelete(audio)}
+            puedeEditar={puedeEditar}
           />
         ))}
       </div>

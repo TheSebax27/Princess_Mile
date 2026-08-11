@@ -9,9 +9,11 @@ import { X, Plus, Trash2, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { SectionTitle } from '../components/ui/GlassCard';
 import { useGallery, type FotoGaleria } from '../hooks/useGallery';
+import { useAuth } from '../context/AuthContext';
 
 export function Gallery() {
   const { fotos, apiAvailable, uploading, upload, remove } = useGallery();
+  const { puedeEditar } = useAuth();
   const [seleccionada, setSeleccionada] = useState<FotoGaleria | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -45,7 +47,7 @@ export function Gallery() {
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <SectionTitle eyebrow="Recuerdos" title="Galería" subtitle="Momentos que quiero conservar tal cual fueron." />
 
-        {apiAvailable && (
+        {apiAvailable && puedeEditar && (
           <div>
             <input
               ref={inputRef}
@@ -120,7 +122,7 @@ export function Gallery() {
             <button onClick={() => setSeleccionada(foto)} className="block w-full">
               <img src={foto.url} alt={foto.titulo} className="w-full object-cover" loading="lazy" />
             </button>
-            {foto.puedeEliminar && (
+            {foto.puedeEliminar && puedeEditar && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

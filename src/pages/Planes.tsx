@@ -4,6 +4,7 @@ import { MapPin, Plus, Pencil, Trash2, X, Image as ImageIcon, Loader2, Check, Cl
 import toast from 'react-hot-toast';
 import { SectionTitle } from '../components/ui/GlassCard';
 import { usePlanes, type Plan, type PlanEstado } from '../hooks/usePlanes';
+import { useAuth } from '../context/AuthContext';
 
 function formatFecha(iso: string) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('es-CO', {
@@ -43,6 +44,7 @@ const ESTADOS: { value: PlanEstado; label: string }[] = [
 
 export function Planes() {
   const { planes, loading, apiAvailable, saving, create, update, remove, toggleEstado } = usePlanes();
+  const { puedeEditar } = useAuth();
   const [form, setForm] = useState<FormState | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -118,7 +120,7 @@ export function Planes() {
     <div>
       <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
         <SectionTitle eyebrow="Notas a futuro" title="Planes" subtitle="Cosas que queremos hacer juntos, con fecha o sin ella." />
-        {apiAvailable && (
+        {apiAvailable && puedeEditar && (
           <button
             onClick={openNew}
             className="flex items-center gap-2 rounded-full bg-gradient-to-r from-red-dark to-red px-5 py-2.5 text-sm font-semibold shadow-lg shadow-red/20 transition-transform hover:-translate-y-0.5"
@@ -163,31 +165,34 @@ export function Planes() {
                 )}
 
                 <button
-                  onClick={() => handleToggle(p)}
+                  onClick={() => puedeEditar && handleToggle(p)}
+                  disabled={!puedeEditar}
                   className={`absolute left-2 top-2 flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur transition-colors ${
                     hecho ? 'bg-green-600/85 text-white hover:bg-green-600' : 'bg-black/60 text-amber-300 hover:bg-black/75'
-                  }`}
+                  } disabled:cursor-default`}
                 >
                   {hecho ? <Check className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                   {hecho ? 'Hecho' : 'Por hacer'}
                 </button>
 
-                <div className="absolute right-2 top-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-                  <button
-                    onClick={() => openEdit(p)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
-                    aria-label="Editar"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(p)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
-                    aria-label="Eliminar"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+                {puedeEditar && (
+                  <div className="absolute right-2 top-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => openEdit(p)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
+                      aria-label="Editar"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur hover:bg-red"
+                      aria-label="Eliminar"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-red-bright">{formatFecha(p.fecha)}</p>

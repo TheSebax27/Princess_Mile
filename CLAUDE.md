@@ -30,12 +30,27 @@ usa datos de `src/data/demoData.ts` como fallback — así la app nunca se rompe
 `VITE_ACCESS_CODE` (código opcional de la pantalla de login, vacío = sin candado),
 `VITE_SPOTIFY_PLAYLIST_URL`.
 
-## Auth (muy simple, no es Supabase Auth)
+## Auth (Supabase Auth real, con roles)
 
-`src/context/AuthContext.tsx`: si `VITE_ACCESS_CODE` está vacío, `isUnlocked` es `true`
-siempre. Si tiene valor, compara (case-insensitive, trim) contra lo que se escribe en
-`src/pages/Login.tsx`, y guarda el estado en `sessionStorage` (`princesa-mile:unlocked`).
-No hay usuarios reales ni JWT — es solo una cortina de acceso.
+Desde 2026-08-05 ya no es solo un código de acceso: `src/context/AuthContext.tsx` usa
+`supabase.auth` (email + contraseña) de verdad. Cada cuenta tiene una fila espejo en la
+tabla `usuarios` (`auth_id`, `nombre`, `rol`), con `rol` en `admin` | `editor` |
+`visualizador` (ver `supabase/agregar_auth_roles.sql` — hay que correrlo una vez).
+
+- **Registro** (`Login.tsx`, modo "Crear cuenta"): siempre crea al usuario con
+  `rol = 'visualizador'`, hardcodeado en `AuthContext.signup()` — nadie se puede
+  auto-asignar admin/editor desde la web. Para que Sebastián sea `admin` y Mile
+  `editor`, cada uno se registra normal y después alguien les cambia el `rol` a mano
+  desde el Table Editor de Supabase (tabla `usuarios`).
+- `puedeEditar` = `rol === 'admin' || rol === 'editor'` — gatea los botones de
+  escritura en `Gallery.tsx`, `Planes.tsx` y `Audios.tsx` (subir/editar/eliminar
+  desaparecen para `visualizador`; el resto de la web sigue siendo de solo lectura
+  para todos los roles igual que antes, ahí no cambió nada).
+- **Duración de sesión** (Ajustes): `duracionSesion` = `'siempre'` (default, Supabase
+  mantiene la sesión sola vía refresh token) o `'1h'` — en ese caso `AuthContext` guarda
+  la hora de login en `localStorage` y se auto-desloguea con un `setTimeout` al cumplirse.
+- `VITE_ACCESS_CODE` quedó **obsoleto** (ya no se usa en ningún lado, se puede borrar
+  del `.env` cuando quieras).
 
 ## Rutas (`src/App.tsx`)
 
